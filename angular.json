@@ -3,5 +3,37 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-  }
+    "custom-calendar": {
+      "projectType": "library",
+      "root": "projects/custom-calendar",
+      "sourceRoot": "projects/custom-calendar/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/custom-calendar/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/custom-calendar/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/custom-calendar/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/custom-calendar/src/test.ts",
+            "tsConfig": "projects/custom-calendar/tsconfig.spec.json",
+            "karmaConfig": "projects/custom-calendar/karma.conf.js"
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "custom-calendar"
 }
