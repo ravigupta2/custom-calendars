@@ -1,4 +1,14 @@
-import {Component, EventEmitter, Input, OnInit, Output, Pipe, PipeTransform} from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  Pipe,
+  PipeTransform,
+  SimpleChanges
+} from '@angular/core';
 
 export class CalendarDay {
   public date: Date;
@@ -34,7 +44,7 @@ export class CalendarDay {
     this.weekIndex = d.getDay();
     this.monthIndex = d.getMonth();
     this.year = d.getFullYear();
-    this.disable = false;
+    this.disable = this.isPastDate;
     this.selected = false;
   }
 
@@ -102,7 +112,7 @@ export class ChunkPipe implements PipeTransform {
         <div class="w100 flex" *ngFor="let row of calendar | chunk: 7; let i = index">
           <div class="singleBlock flex align-center justify-center" *ngFor="let c of row; let j = index">
 
-            <div class="w100 block" (click)="dateClickButton(c)" [ngClass]="{'past-date': c?.isPastDate, 'today': c?.isToday , 'selected': c?.selected ,  'disabled-date':c?.disable}">
+            <div class="w100 block" (click)="dateClickButton(c)" [ngClass]="{'past-date disabled-date': c?.isPastDate, 'today': c?.isToday , 'selected': c?.selected ,  'disabled-date':c?.disable}">
               <p *ngIf="c" >
                 {{c.date.getDate()}}
               </p>
@@ -114,7 +124,7 @@ export class ChunkPipe implements PipeTransform {
   `,
   styleUrls: ['./custom-calendar.component.scss']
 })
-export class CustomCalendarComponent implements OnInit {
+export class CustomCalendarComponent implements OnInit , OnChanges {
   public calendar: CalendarDay[] = [];
   public monthNames = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
@@ -131,8 +141,11 @@ export class CustomCalendarComponent implements OnInit {
     this.selectedDate = this.dateString(new Date());
     document.documentElement.style.setProperty('--defaultColor', this.color ? this.color : '#726DCC');
     this.generateCalendarDays();
-    console.log(this.disable)
   }
+  ngOnChanges(changes: SimpleChanges) {
+    this.generateCalendarDays();
+  }
+
   private generateCalendarDays(): void {
     this.calendar = [];
     const totalDaysOfMonth = this.getTotalDaysOfMonth(this.selectedMonth, this.selectedYear);
@@ -182,12 +195,13 @@ export class CustomCalendarComponent implements OnInit {
     this.monthChangeEvent.emit({month: this.selectedMonth, year: this.selectedYear});
   }
   dateClickButton = (date: any) => {
-    console.log(date.getDateString2())
-    this.calendar.map((day: any) => { day.selected = false})
-    date.selected = true;
-    this.selectedDate = date.getDateString2();
-    console.log(this.selectedDate)
-    this.dateClick.emit(date);
+    if(!date.disable){
+      this.calendar.map((day: any) => { day.selected = false})
+      date.selected = true;
+      this.selectedDate = date.getDateString2();
+      console.log(this.selectedDate)
+      this.dateClick.emit(date);
+    }
   }
   public dateString(date: Date): string {
     let d = date,
