@@ -90,23 +90,17 @@ export class ChunkPipe implements PipeTransform {
   selector: 'custom-calendar2',
   template: `
     <div class="flex align-center">
-      <div class="w20 p20"  (click)="changeMonth(false)">
+      <div class="w20 p20" [ngClass]="{'disabled-date':backDisable}"  (click)="changeMonth(false)" >
         <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M2.117 12l7.527 6.235-.644.765-9-7.521 9-7.479.645.764-7.529 6.236h21.884v1h-21.883z"/></svg>
       </div>
-      <div class="w60 text-center">{{monthNames[selectedMonth]}}</div>
-      <div class="w20 text-right p20"  (click)="changeMonth(true)">
+      <div class="w60 text-center">{{monthNames[selectedMonth]}}{{showYear ? selectedYear : ''}}</div>
+      <div class="w20 text-right p20" [ngClass]="{'disabled-date':forwardDisable}"  (click)="changeMonth(true)">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill-rule="evenodd" clip-rule="evenodd"><path d="M21.883 12l-7.527 6.235.644.765 9-7.521-9-7.479-.645.764 7.529 6.236h-21.884v1h21.883z"/></svg>
       </div>
     </div>
     <div class="calendar">
       <div class="w100 flex">
-        <div class="singleBlock"><strong>Sunday</strong></div>
-        <div class="singleBlock"><strong>Monday</strong></div>
-        <div class="singleBlock"><strong>Tuesday</strong></div>
-        <div class="singleBlock"><strong>Wednesday</strong></div>
-        <div class="singleBlock"><strong>Thursday</strong></div>
-        <div class="singleBlock"><strong>Friday</strong></div>
-        <div class="singleBlock"><strong>Saturday</strong></div>
+        <div class="singleBlock" *ngFor="let day of weekDays"><strong>{{day}}</strong></div>
       </div>
       <div>
         <div class="w100 flex" *ngFor="let row of calendar | chunk: 7; let i = index">
@@ -126,14 +120,23 @@ export class ChunkPipe implements PipeTransform {
 })
 export class CustomCalendarComponent implements OnInit , OnChanges {
   public calendar: CalendarDay[] = [];
-  public monthNames = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
   selectedMonth = new Date().getMonth();
   selectedYear = new Date().getFullYear();
+  currentMonth = new Date().getMonth();
+  currentYear = new Date().getFullYear();
   selectedDate: string | undefined;
+  backDisable = false;
+  forwardDisable = false;
   @Input() disable: string[] = [];
   @Input() color: string = '';
+  @Input() monthNames = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  @Input() weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+    "Saturday"];
+  @Input() showYear = false;
+  @Input() disableBack = false;
+  @Input() disableFuture = false;
   @Output() monthChangeEvent = new EventEmitter();
   @Output() dateClick = new EventEmitter();
 
@@ -161,6 +164,12 @@ export class CustomCalendarComponent implements OnInit , OnChanges {
       this.calendar.push(obj);
       dateToAdd = this.incrementDate(dateToAdd);
     }
+    if(this.disableBack){
+      this.backDisable = (this.currentYear >= this.selectedYear) && (this.currentMonth <= this.selectedMonth);
+    }
+    if(this.disableFuture) {
+      this.forwardDisable = (this.currentYear <= this.selectedYear) && (this.currentMonth >= this.selectedMonth);
+    }
   }
   // this function will return total number of days of a month base on month index  and year
   public getTotalDaysOfMonth(monthIndex: number, year: number): number {
@@ -180,9 +189,13 @@ export class CustomCalendarComponent implements OnInit , OnChanges {
   }
   changeMonth =  (increment: any) =>  {
     if(increment){
-      this.selectedMonth++;
+      if(!this.disableFuture){
+        this.selectedMonth++;
+      }
     }else{
-      this.selectedMonth--;
+      if(!this.disableBack){
+        this.selectedMonth--;
+      }
     }
     if(this.selectedMonth > 11){
       this.selectedMonth = 0;
