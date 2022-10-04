@@ -3,28 +3,63 @@ $sizes: 100;
 @mixin margin-classes {
   @for $i from 0 through $sizes {
     $margin: $i * 1px;
-    .m#{$i}  {margin: $margin;}
-    .ml#{$i} {margin-left: $margin;}
-    .mr#{$i} {margin-right: $margin;}
-    .mt#{$i} {margin-top: $margin;}
-    .mb#{$i} {margin-bottom: $margin;}
-    .mx#{$i} {margin-left: $margin; margin-right: $margin;}
-    .my#{$i} {margin-top: $margin; margin-bottom: $margin;}
-    .p#{$i} {padding: $margin;}
-    .pl#{$i} {padding-left: $margin;}
-    .pr#{$i} {padding-right: $margin;}
-    .pt#{$i} {padding-top: $margin;}
-    .pb#{$i} {padding-bottom: $margin;}
-    .px#{$i} {padding-left: $margin; padding-right: $margin;}
-    .py#{$i} {padding-top: $margin; padding-bottom: $margin;}
-    .mh#{$i}  {min-height: $margin;}
+    .m#{$i} {
+      margin: $margin;
+    }
+    .ml#{$i} {
+      margin-left: $margin;
+    }
+    .mr#{$i} {
+      margin-right: $margin;
+    }
+    .mt#{$i} {
+      margin-top: $margin;
+    }
+    .mb#{$i} {
+      margin-bottom: $margin;
+    }
+    .mx#{$i} {
+      margin-left: $margin;
+      margin-right: $margin;
+    }
+    .my#{$i} {
+      margin-top: $margin;
+      margin-bottom: $margin;
+    }
+    .p#{$i} {
+      padding: $margin;
+    }
+    .pl#{$i} {
+      padding-left: $margin;
+    }
+    .pr#{$i} {
+      padding-right: $margin;
+    }
+    .pt#{$i} {
+      padding-top: $margin;
+    }
+    .pb#{$i} {
+      padding-bottom: $margin;
+    }
+    .px#{$i} {
+      padding-left: $margin;
+      padding-right: $margin;
+    }
+    .py#{$i} {
+      padding-top: $margin;
+      padding-bottom: $margin;
+    }
+    .mh#{$i} {
+      min-height: $margin;
+    }
   }
 }
+
 @include margin-classes;
 
 $width: 5 10 15 20 25 30 33 35 40 45 50 55 60 65 70 75 80 90 100;
 @each $current-width in $width {
-  .w#{$current-width}{
+  .w#{$current-width} {
     width: $current-width*1%;
   }
 }
@@ -32,159 +67,204 @@ $width: 5 10 15 20 25 30 33 35 40 45 50 55 60 65 70 75 80 90 100;
 $fontSizes: 6 10 12 14 15 16 18 20 22 24 26 28 30 32 34 36 40 48 50;
 
 @each $size in $fontSizes {
-  .font#{$size}{
+  .font#{$size} {
     font-size: $size+px;
     line-height: ($size)*1.618+px;
   }
 }
+
 $fontSize2: 100 200 300 400 500 600 700 800 900;
 @each $size in $fontSize2 {
   .fw#{$size} {
     font-weight: $size;
   }
 }
-p{
+
+p {
   margin: 0;
 }
+
 .noClick {
   pointer-events: none;
 }
+
 .margin-auto {
   margin: auto;
 }
+
 .uppercase {
   text-transform: uppercase;
 }
-.underline{
+
+.underline {
   text-decoration: underline;
 }
+
 .capitalize {
   text-transform: capitalize;
 }
+
 .text-center {
   text-align: center;
 }
+
 .text-right {
   text-align: right;
 }
+
 .text-left {
   text-align: left;
 }
+
 .fl {
   float: left;
 }
+
 .fr {
   float: right;
 }
+
 .flex {
   display: flex !important;
 }
-.flex-col{
+
+.flex-col {
   flex-direction: column;
 }
+
 .align-center {
   align-items: center;
 }
+
 .align-end {
   align-items: flex-end;
 }
+
 .justify-start {
   justify-content: flex-start;
 }
+
 .justify-end {
   justify-content: flex-end;
 }
+
 .justify-between {
   justify-content: space-between;
 }
+
 .justify-around {
   justify-content: space-around;
 }
-.justify-center{
+
+.justify-center {
   justify-content: center;
 }
-.flex-wrap{
+
+.flex-wrap {
   flex-wrap: wrap;
 }
-.overflow-hidden{
+
+.overflow-hidden {
   overflow: hidden;
 }
-.relative{
+
+.relative {
   position: relative;
 }
-.fixed{
+
+.fixed {
   position: fixed;
 }
-.top-0{
+
+.top-0 {
   top: 0;
 }
-.bottom-0{
+
+.bottom-0 {
   bottom: 0;
 }
-.left-0{
+
+.left-0 {
   left: 0;
 }
-.right-0{
+
+.right-0 {
   right: 0;
 }
-.absolute{
+
+.absolute {
   position: absolute;
 }
+
 .d-none {
   display: none;
 }
+
 .border-radius6 {
   border-radius: 6px;
 }
+
 .border-radius10 {
   border-radius: 10px;
 }
+
 .border-radius14 {
   border-radius: 14px;
 }
+
 .border-radius16 {
   border-radius: 16px;
 }
+
 .border-radius20 {
   border-radius: 20px;
 }
+
 .border-radius60 {
   border-radius: 60px;
 }
+
 .border-radius35 {
   border-radius: 35px;
 }
-.br-50{
+
+.br-50 {
   border-radius: 50%;
 }
-.box-shadow{
+
+.box-shadow {
   box-shadow: 0 0 10px #00000029;
 }
-.noWrap{
+
+.noWrap {
   white-space: nowrap;
 }
+
 .text-transform-upper {
   text-transform: uppercase;
 }
+
 @media only screen and (max-height: 667px) and (max-width: 375px) {
-  :root{
+  :root {
     --defaultColor: #726DCC;
   }
 }
+
 @media only screen and (max-width: 375px) {
-  $fontSizes:16 18 20 22 24 26 28 30 32 34 36 40 48 50;
+  $fontSizes: 16 18 20 22 24 26 28 30 32 34 36 40 48 50;
 
   @each $size in $fontSizes {
-    .font#{$size}{
+    .font#{$size} {
       font-size: ($size - 2)+px;
     }
   }
 }
 
-.calendar{
+.calendar {
 }
-.singleBlock{
-  width:14.28%;
+
+.singleBlock {
+  width: 14.28%;
   text-align: center;
   padding: 7px;
 
@@ -198,26 +278,60 @@ p{
   color: var(--defaultColor);
   font-weight: 600;
 }
+
 .disabled-date {
   color: rgb(128, 128, 128);
-  opacity: 0.6  ;
-  cursor: none;
+  opacity: 0.6;
 }
-.block{
-  width:30px;
-  height:30px;
+
+.block {
+  width: 30px;
+  height: 30px;
   align-items: center;
   display: flex;
-justify-content: center;
+  justify-content: center;
   border-radius: 50%;
   cursor: pointer;
+  padding: 4px;
 }
+
+.listblock {
+  width: auto;
+}
+
+.list {
+  margin: 0 auto;
+
+  .singleBlockParent {
+    display: inline-block;
+    width: 24%;
+    border: 1px solid transparent;
+
+    .singleBlock {
+      width: auto;
+    }
+  }
+
+}
+
+.listSelector {
+  border: 1px solid var(--defaultColor) !important;
+  border-radius: 20px !important;
+}
+
 .selected {
   background: var(--defaultColor);
   border-radius: 50%;
   color: #fff;
-  padding: 5px;
 }
-.today{
+
+.today {
   border: 1px solid var(--defaultColor);
+}
+
+.name_of_month {
+  margin: 0 auto;
+  p{
+    cursor: pointer;
+  }
 }
