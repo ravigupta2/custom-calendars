@@ -9,52 +9,52 @@ import {
   PipeTransform,
   SimpleChanges
 } from '@angular/core';
-
 export class CalendarDay {
   public date: Date;
   public isPastDate: boolean;
+  public isFutureDate: boolean;
   public isToday: boolean;
   public weekIndex: number;
   public monthIndex: number;
   public year: number;
   public disable: boolean | undefined;
   public selected: boolean;
-
   public getDateString() {
     return this.date.toISOString().split("T")[0]
   }
-
   // format date as 'YYYY-MM-DD'
   public getDateString2() {
     let d = this.date,
       month = '' + (d.getMonth() + 1),
       day = '' + d.getDate(),
       year = d.getFullYear();
-
     if (month.length < 2)
       month = '0' + month;
     if (day.length < 2)
       day = '0' + day;
     return [year, month, day].join('-');
   }
-
-  constructor(d: Date) {
+  constructor(d: Date , future: boolean, past: boolean) {
     this.date = d;
     this.isPastDate = d.setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0);
+    this.isFutureDate = d.setHours(0, 0, 0, 0) > new Date().setHours(0, 0, 0, 0);
     this.isToday = d.setHours(0, 0, 0, 0) == new Date().setHours(0, 0, 0, 0);
     this.weekIndex = d.getDay();
     this.monthIndex = d.getMonth();
     this.year = d.getFullYear();
-    this.disable = this.isPastDate;
     this.selected = false;
+    if (past){
+      this.disable = this.isPastDate;
+    }else if(future){
+      this.disable = this.isFutureDate;
+    }
   }
 }
-
 @Pipe({
   name: 'chunk'
 })
 export class ChunkPipe implements PipeTransform {
-
+  // checkDisableAllPastDates : any, checkDisableAllFutureDates : any
   transform(calendarDaysArray: any, firstDay: any): any {
     let calendarDays: any[][] = [];
     let weekDays: any[] = [null, null, null, null, null, null, null];
@@ -86,7 +86,6 @@ export class ChunkPipe implements PipeTransform {
     return calendarDays;
   }
 }
-
 @Component({
   selector: 'custom-calendar2',
   template: `
@@ -144,7 +143,6 @@ export class ChunkPipe implements PipeTransform {
         </div>
       </div>
     </div>
-
   `,
   styleUrls: ['./custom-calendar.component.scss']
 })
@@ -165,6 +163,8 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
   @Input() disableBack = false;
   @Input() disableFuture = false;
   @Input() firstDayOfWeek: number = 0;
+  @Input() disableAllPastDates: boolean = false;
+  @Input() disableAllFutureDates: boolean = false;
   @Output() monthChangeEvent = new EventEmitter();
   @Output() dateClick = new EventEmitter();
   newWeekDays1: any = [];
@@ -186,16 +186,14 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
     {month_name: "October", month_disable: false},
     {month_name: "November", month_disable: false},
     {month_name: "December", month_disable: false}];
-
   ngOnInit(): void {
     this.setFirstDayOfWeek(this.firstDayOfWeek)
-    this.selectedDate = (this.selectedDate == '' || !this.selectedDate || this.selectedDate == undefined) ? this.dateString(new Date()) : this.selectedDate;
+    this.selectedDate = (this.selectedDate == '' || !this.selectedDate || false) ? this.dateString(new Date()) : this.selectedDate;
     if (this.getMonthIndexAndYear(new Date(this.selectedDate)) != this.selectedMonth) {
       this.selectedMonth = new Date(this.selectedDate).getMonth();
       this.selectedYear = new Date(this.selectedDate).getFullYear();
     }
     this.forwardDisable = (this.currentMonth == this.calendar[0].monthIndex)
-
     this.setmonth()
     this.checkForDisableArrows()
     document.documentElement.style.setProperty('--defaultColor', this.color ? this.color : '#726DCC');
@@ -204,11 +202,9 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
       this.firstDayOfWeek = 0;
     }
   }
-
   ngOnChanges(changes: SimpleChanges) {
     this.generateCalendarDays();
   }
-
   //set first day of the week
   setFirstDayOfWeek(firstDayOfWeek: any) {
     for (let i = 0; i < 7; i++) {
@@ -220,13 +216,12 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
     }
     this.weekDays = this.newWeekDays2.concat(this.newWeekDays1)
   }
-
   private generateCalendarDays(): void {
     this.calendar = [];
     const totalDaysOfMonth = this.getTotalDaysOfMonth(this.selectedMonth, this.selectedYear);
     let dateToAdd = this.getStartingDateOfMonth(this.selectedMonth, this.selectedYear);
     for (let i = 0; i < totalDaysOfMonth; i++) {
-      const obj = new CalendarDay(new Date(dateToAdd));
+      const obj = new CalendarDay(new Date(dateToAdd) , this.disableAllFutureDates , this.disableAllPastDates);
       if (this.disable.includes(obj.getDateString2())) {
         obj.disable = true;
       }
@@ -238,27 +233,22 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
     }
     this.checkForDisableArrows()
   }
-
   // this function will return total number of days of a month base on month index  and year
   public getTotalDaysOfMonth(monthIndex: number, year: number): number {
     return new Date(year, monthIndex + 1, 0).getDate();
   }
-
   // get month index and current year from new date object
   public getMonthIndexAndYear(date: Date): number {
     return date.getMonth();
   }
-
   // get starting date of month
   public getStartingDateOfMonth(monthIndex: number, year: number): Date {
     return new Date(year, monthIndex, 1);
   }
-
   // increment date object by 1 day
   public incrementDate(date: Date): Date {
     return new Date(date.setDate(date.getDate() + 1));
   }
-
   //increment and decrement of month
   changeMonth = (increment: any) => {
     if (increment) {
@@ -307,7 +297,6 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
       this.dateClick.emit(dateDetails);
     }
   }
-
   public dateString(date: Date): string {
     let d = date,
       month = '' + (d.getMonth() + 1),
@@ -319,7 +308,6 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
       day = '0' + day;
     return [year, month, day].join('-');
   }
-
   //open list of month
   findMonth() {
     if (this.disableBack) {
@@ -340,7 +328,6 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
     }
     this.month_is = ''
   }
-
   //open the month clicked
   openThisMonth(index: any, month: any) {
     if (month.month_disable == false) {
@@ -352,7 +339,6 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
       this.yearListOpen = false;
     }
   }
-
   //open the year clicked
   openThisYear(year: number) {
     this.selectedYear = year;
@@ -362,20 +348,30 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
       this.disableOldMonths()
     }
   }
-
   //for showing which month is selected
   setmonth() {
     this.month_is = this.monthNames[this.selectedMonth]
   }
-
   checkForDisableArrows() {
     this.backDisable = (this.currentMonth == this.calendar[0].monthIndex) && this.disableBack
     this.forwardDisable = (this.currentMonth == this.calendar[0].monthIndex) && this.disableFuture
   }
-
   disableOldMonths() {
     for (let i = 0; i < this.allMonths.length; i++) {
       this.allMonths[i].month_disable = (i < this.currentMonth) && (this.selectedYear == this.currentYear);
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
