@@ -190,10 +190,10 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     this.setFirstDayOfWeek(this.firstDayOfWeek)
     this.selectedDate = (this.selectedDate == '' || !this.selectedDate || this.selectedDate == undefined) ? this.dateString(new Date()) : this.selectedDate;
-    if (this.getMonthIndexAndYear(new Date(this.selectedDate)) != this.selectedMonth) {
-      this.selectedMonth = new Date(this.selectedDate).getMonth();
-      this.selectedYear = new Date(this.selectedDate).getFullYear();
-    }
+    // if ((this.getMonthIndex(new Date(this.selectedDate)) != this.selectedMonth)) {
+    this.selectedMonth = new Date(this.selectedDate).getMonth();
+    this.selectedYear = new Date(this.selectedDate).getFullYear();
+    // }
     this.forwardDisable = (this.currentMonth == this.calendar[0].monthIndex)
     this.setmonth()
     this.checkForDisableArrows()
@@ -202,9 +202,16 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
     if (!((this.firstDayOfWeek >= 0) && (this.firstDayOfWeek < 7))) {
       this.firstDayOfWeek = 0;
     }
+    this.changeMonthNamesDynamic()
   }
   ngOnChanges(changes: SimpleChanges) {
     this.generateCalendarDays();
+  }
+  //change dynamic name from input
+  changeMonthNamesDynamic(){
+    this.allMonths.map((month:any, i:any)=>{
+      month.month_name = this.monthNames[i]
+    })
   }
   //set first day of the week
   setFirstDayOfWeek(firstDayOfWeek: any) {
@@ -239,7 +246,7 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
     return new Date(year, monthIndex + 1, 0).getDate();
   }
   // get month index and current year from new date object
-  public getMonthIndexAndYear(date: Date): number {
+  public getMonthIndex(date: Date): number {
     return date.getMonth();
   }
   // get starting date of month
