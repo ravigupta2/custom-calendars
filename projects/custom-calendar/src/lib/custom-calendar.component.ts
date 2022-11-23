@@ -91,15 +91,16 @@ export class ChunkPipe implements PipeTransform {
   template: `
     <div class="flex align-center">
       <div class="w20 p20" [ngClass]="{'disabled-date':backDisable}" (click)="changeMonth(false)"
-           *ngIf="!monthListOpen && !yearListOpen">
+           *ngIf="!monthListOpen">
         <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd">
           <path d="M2.117 12l7.527 6.235-.644.765-9-7.521 9-7.479.645.764-7.529 6.236h21.884v1h-21.883z"/>
         </svg>
       </div>
-      <div (click)="findMonth()"
-           class="w60 p20 text-center name_of_month"><p>{{month_is}}&nbsp;{{showYear ? selectedYear : ''}}</p></div>
+      <div (click)="findMonth()" class="w60 p20 text-center name_of_month">
+        <p *ngIf="!this.yearListOpen">{{month_is}}&nbsp;{{showYear ? selectedYear : ''}}</p>
+      </div>
       <div class="w20 text-right p20" [ngClass]="{'disabled-date':forwardDisable}" (click)="changeMonth(true)"
-           *ngIf="!monthListOpen && !yearListOpen">
+           *ngIf="!monthListOpen">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill-rule="evenodd" clip-rule="evenodd">
           <path d="M21.883 12l-7.527 6.235.644.765 9-7.521-9-7.479-.645.764 7.529 6.236h-21.884v1h21.883z"/>
         </svg>
@@ -136,7 +137,7 @@ export class ChunkPipe implements PipeTransform {
     <div class="list" *ngIf="yearListOpen">
       <div class="singleBlockParent" *ngFor="let year of all_years ; let i = index"
            [ngClass]="{'listSelector': year == selectedYear}">
-        <div class="singleBlock ">
+        <div class="singleBlock">
           <div class="w100 justify-center flex align-center">
             <p class="block listblock" (click)="openThisYear(year)">{{year}}</p>
           </div>
@@ -188,7 +189,7 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
     {month_name: "December", month_disable: false}];
   ngOnInit(): void {
     this.setFirstDayOfWeek(this.firstDayOfWeek)
-    this.selectedDate = (this.selectedDate == '' || !this.selectedDate || false) ? this.dateString(new Date()) : this.selectedDate;
+    this.selectedDate = (this.selectedDate == '' || !this.selectedDate || this.selectedDate == undefined) ? this.dateString(new Date()) : this.selectedDate;
     if (this.getMonthIndexAndYear(new Date(this.selectedDate)) != this.selectedMonth) {
       this.selectedMonth = new Date(this.selectedDate).getMonth();
       this.selectedYear = new Date(this.selectedDate).getFullYear();
@@ -252,22 +253,40 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
   //increment and decrement of month
   changeMonth = (increment: any) => {
     if (increment) {
-      if (!this.disableFuture) {
-        this.selectedMonth++;
-      } else {
-        this.checkForDisableArrows()
-        if (this.currentMonth != this.calendar[0].monthIndex) {
+      if (!this.yearListOpen){
+        if (!this.disableFuture) {
           this.selectedMonth++;
+        } else {
+          this.checkForDisableArrows()
+          if (this.currentMonth != this.calendar[0].monthIndex) {
+            this.selectedMonth++;
+          }
+        }
+      }else{
+        let x = this.all_years[ this.all_years.length - 1]
+        this.all_years = []
+        for (let i = 0; i < 12; i++) {
+          this.all_years.push(x)
+          x++
         }
       }
     } else {
-      if (!this.disableBack) {
-        this.backDisable = false
-        this.selectedMonth--;
-      } else {
-        this.checkForDisableArrows()
-        if (this.currentMonth != this.calendar[0].monthIndex) {
+      if (!this.yearListOpen){
+        if (!this.disableBack) {
+          this.backDisable = false
           this.selectedMonth--;
+        } else {
+          this.checkForDisableArrows()
+          if (this.currentMonth != this.calendar[0].monthIndex) {
+            this.selectedMonth--;
+          }
+        }
+      }else{
+        let x = this.all_years[0]
+        this.all_years = []
+        for (let i = 0; i < 12; i++) {
+          this.all_years.unshift(x)
+          x--
         }
       }
     }
@@ -281,6 +300,10 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
     this.setmonth();
     this.generateCalendarDays();
     this.monthChangeEvent.emit({month: this.selectedMonth, year: this.selectedYear});
+    if (this.yearListOpen){
+      this.forwardDisable = false
+      this.backDisable = false
+    }
   }
   //select date
   dateClickButton = (date: any) => {
@@ -313,9 +336,14 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
     if (this.disableBack) {
       this.disableOldMonths()
     }
+    if (this.disableFuture) {
+      this.disableFutureMonths()
+    }
     if (this.monthListOpen) {
       this.monthListOpen = false
       this.yearListOpen = true
+      this.backDisable = false
+      this.forwardDisable = false
       this.all_years = []
       let x = new Date().getFullYear()
       for (let i = 0; i < 12; i++) {
@@ -347,6 +375,9 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
     if (this.disableBack) {
       this.disableOldMonths()
     }
+    if (this.disableFuture) {
+      this.disableFutureMonths()
+    }
   }
   //for showing which month is selected
   setmonth() {
@@ -357,21 +388,13 @@ export class CustomCalendarComponent implements OnInit, OnChanges {
     this.forwardDisable = (this.currentMonth == this.calendar[0].monthIndex) && this.disableFuture
   }
   disableOldMonths() {
-    for (let i = 0; i < this.allMonths.length; i++) {
-      this.allMonths[i].month_disable = (i < this.currentMonth) && (this.selectedYear == this.currentYear);
-    }
+    // for (let i = 0; i < this.allMonths.length; i++) {
+    //   this.allMonths[i].month_disable = (i < this.currentMonth) && (this.selectedYear == this.currentYear);
+    // }
+  }
+  disableFutureMonths() {
+    // for (let i = 0; i < this.allMonths.length; i++) {
+    //   this.allMonths[i].month_disable = (i > this.currentMonth) && (this.selectedYear == this.currentYear);
+    // }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
